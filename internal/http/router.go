@@ -21,6 +21,7 @@ func NewRouter(db *sql.DB, cfg config.Config) *gin.Engine {
 	auth.Use(h.AuthMiddleware())
 	auth.GET("/me", h.Me)
 	auth.POST("/orgs", h.CreateOrg) // you can protect this if you want
-
+	auth.POST("/artifacts/:id/ai", h.GenerateAI)
+	
 	return r
 }

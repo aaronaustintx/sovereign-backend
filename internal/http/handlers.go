@@ -8,20 +8,37 @@ import (
 	"github.com/aaronaustintx/sovereign-backend/internal/orgs"
 	"github.com/aaronaustintx/sovereign-backend/internal/users"
 	"github.com/gin-gonic/gin"
+	"github.com/aaronaustintx/sovereign-backend/internal/artifacts"
+	"github.com/aaronaustintx/sovereign-backend/internal/ai_outputs"
+	"github.com/aaronaustintx/sovereign-backend/internal/spaces"
+	"github.com/aaronaustintx/sovereign-backend/internal/events"
+	"github.com/aaronaustintx/sovereign-backend/internal/ai"
 )
 
 type Handlers struct {
-	orgService  *orgs.Service
-	userService *users.Service
-	jwtManager  *JWTManager
+    orgService       *orgs.Service
+    userService      *users.Service
+    spaceService     *spaces.Service
+    artifactService  *artifacts.Service
+    aiOutputService  *ai_outputs.Service
+    jwtManager       *JWTManager
+    aiClient         *ai.Client
+	eventService 	*events.Service
+	
 }
 
 func NewHandlers(db *sql.DB, cfg config.Config) *Handlers {
-	return &Handlers{
-		orgService:  orgs.NewService(db),
-		userService: users.NewService(db),
-		jwtManager:  NewJWTManager(cfg),
-	}
+    return &Handlers{
+        orgService:      orgs.NewService(db),
+        userService:     users.NewService(db),
+        spaceService:    spaces.NewService(db),
+        artifactService: artifacts.NewService(db),
+        aiOutputService: ai_outputs.NewService(db),
+        eventService:    events.NewService(db),
+        jwtManager:      NewJWTManager(cfg),
+        aiClient:        ai.New(cfg.OpenAIKey),
+		
+    }
 }
 
 func (h *Handlers) Health(c *gin.Context) {
@@ -96,3 +113,4 @@ func (h *Handlers) Login(c *gin.Context) {
 		"user":  user,
 	})
 }
+
