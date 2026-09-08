@@ -1,12 +1,12 @@
 # ---------- Build Stage ----------
-FROM golang:1.22-alpine AS builder
+FROM golang:1.27-alpine AS builder
 
 # Install build tools
 RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Copy go.mod and go.sum first (better caching)
+# Copy go.mod and go.sum first
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -21,14 +21,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
-# Copy binary from builder
 COPY --from=builder /app/sovereign .
 
-# Copy config if needed
-COPY config.yaml .
-
-# Expose API port
 EXPOSE 8080
 
-# Run the server
 CMD ["./sovereign"]

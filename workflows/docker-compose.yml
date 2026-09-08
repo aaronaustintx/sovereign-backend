@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: sovereign-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sovereign
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    depends_on:
+      - db
+    entrypoint: [
+      "migrate",
+      "-path", "/migrations",
+      "-database", "postgres://postgres:postgres@db:5432/sovereign?sslmode=disable",
+      "up"
+    ]
+
+  backend:
+    build: .
+    container_name: sovereign-backend
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sovereign?sslmode=disable
+    depends_on:
+      - migrations
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
